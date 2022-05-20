@@ -23,14 +23,19 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: python3.8
-
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
 
 # you can add statements to the Lambda function's IAM Role here
-#  iam:
-#    role:
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - ssm:GetParameter
+            - ssm:GetParameters
+          Resource:
+            - 'arn:aws:ssm:*'
 #      statements:
 #        - Effect: "Allow"
 #          Action:
@@ -46,10 +51,6 @@ provider:
 #                - "Ref" : "ServerlessDeploymentBucket"
 #                - "/*"
 
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-
 # you can add packaging information here
 #package:
 #  patterns:
@@ -58,16 +59,34 @@ provider:
 #    - include-me.py
 #    - include-me-dir/**
 
+# this part might not be needed depending on size of utils
+custom:
+  pythonRequirements:
+    zip: true
+    
+  db:
+    endpoint: ${ssm:/botnot/${self:provider.stage}/db/endpoint, 'botnot.chr0doohyokz.us-east-1.rds.amazonaws.com'}
+    port: ${ssm:/botnot/${self:provider.stage}/db/port, '5432'}
+    name: ${ssm:/botnot/${self:provider.stage}/db/name, 'botnot'}
+    user: ${ssm:/botnot/${self:provider.stage}/db/user, 'botnotdevuser'}
+    password: ${ssm:/botnot/${self:provider.stage}/db/password}
+    connection: >
+      host=${self:custom.db.endpoint}
+      dbname=${self:custom.db.name}
+      user=${self:custom.db.user}
+      password=${self:custom.db.password}
+      port=${self:custom.db.port}
+
 functions:
-  hello:
-    handler: handler.hello
+  GetCustomer:
+    handler: handler.main
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
-#    events:
-#      - httpApi:
-#          path: /users/create
-#          method: get
+    events:
+      - httpApi:
+          path: /customers/{id}
+          method: get
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(10 minutes)
@@ -98,8 +117,8 @@ functions:
 #            path: /hello
 
 #    Define function environment variables here
-#    environment:
-#      variable2: value2
+    environment:
+      DB_CONN: ${self:custom.db.connection}
 
 # you can add CloudFormation resource templates here
 #resources:
@@ -112,3 +131,6 @@ functions:
 #     NewOutput:
 #       Description: "Description for the output"
 #       Value: "Some output value"
+
+plugins:
+  - serverless-python-requirements
