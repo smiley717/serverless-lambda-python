@@ -62,7 +62,8 @@ provider:
 # this part might not be needed depending on size of utils
 custom:
   pythonRequirements:
-    zip: true
+    dockerizePip: true
+    layer: true
     
   db:
     endpoint: ${ssm:/botnot/${self:provider.stage}/db/endpoint, 'botnot.chr0doohyokz.us-east-1.rds.amazonaws.com'}
@@ -85,8 +86,10 @@ functions:
 #    Check the event documentation for details
     events:
       - httpApi:
-          path: /customers/{id}
+          path: /customer/{id}
           method: get
+    layers:
+      - { Ref: PythonRequirementsLambdaLayer }
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(10 minutes)
