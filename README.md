@@ -48,4 +48,4 @@ You can run your lambda function locally by running
 
 ## Manual deployment
 
-Run `  deploy --aws-profile YOUR_AWS_PROFILE` to deploy your cloudformation stack to your AWS Account.
+Run `sls deploy --aws-profile YOUR_AWS_PROFILE` to deploy your cloudformation stack to your AWS Account.
