@@ -14,7 +14,7 @@ pip install -r requirements.txt
 
 ## Test URL
 ```
-https://q9a8nfege5.execute-api.us-east-1.amazonaws.com/customers/{id}
+https://q9a8nfege5.execute-api.us-east-1.amazonaws.com/customer/{id}
 ```
 
 - **URL**: `/customer/3`
